@@ -5,6 +5,7 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 import os
+from forms import UploadForm
 from app import app
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
@@ -26,21 +27,27 @@ def about():
     return render_template('about.html', name="Mary Jane")
 
 
+### Exercise 1
 @app.route('/upload', methods=['POST', 'GET'])
 def upload():
     if not session.get('logged_in'):
         abort(401)
 
     # Instantiate your form class
-
+    photoform = UploadForm()
     # Validate file upload on submit
     if request.method == 'POST':
         # Get file data and save to your uploads folder
-
-        flash('File Saved', 'success')
-        return redirect(url_for('home'))
-
-    return render_template('upload.html')
+        if photoform.validate_on_submit():
+            photo = photoform.photo.data
+            
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            flash('File Saved', 'successfully')
+            return redirect(url_for('home'))
+    flash_errors(photoform)
+    return render_template('upload.html', form=photoform)
 
 
 @app.route('/login', methods=['POST', 'GET'])
