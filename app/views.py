@@ -50,20 +50,20 @@ def upload():
     return render_template('upload.html', form=photoform)
 
 def get_uploaded_images():
-    rootdir = os.getcwd()
     photo = []
-    for subdir, dirs, files in os.walk(rootdir + app.config['UPLOAD_FOLDER'][1:]):
+    for subdir, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
         for file in files:
-            photo.append(os.path.join(app.config['UPLOAD_FOLDER'][21:], file))
-        photo.sort()
-        del photo[0]
-        return photo
+            photo.append(file)
+    photo.sort()
+    del photo[0]
+    return photo
             
 @app.route('/files')
 def files():
     if not session.get('logged_in'):
         abort(401)
     photolist = get_uploaded_images()
+    print photolist
     return render_template('files.html', photos = photolist)
 
 @app.route('/login', methods=['POST', 'GET'])
